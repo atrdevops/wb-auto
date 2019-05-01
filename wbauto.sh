@@ -27,6 +27,23 @@ apt-get install -y software-properties-common # solve add-apt-repository command
 
 useradd --no-create-home --shell /bin/false node_exporter
 
+
+function check_status () {
+service1=$1
+service_state="$(systemctl status $service1 |grep Active |awk '{print $2}')"
+if [ "$service_state" == "active" ]; then
+	echo """ ########################################
+$service1 service is running
+########################################
+"""
+else 
+	echo """ ########################################
+$service1 service is not running!!
+check manually after installation
+########################################
+"""
+}
+
 function exporter_conf () {
 
 type=$1
@@ -65,7 +82,8 @@ sed -i 's/scription=redis_exporter/scription=Redis/g' /etc/systemd/system/$type.
 
 systemctl daemon-reload
 systemctl enable $type
-systemctl start $type
+systemctl start $type ; wait
+check_status $type
 
 if [ "$(systemctl status $type |grep Active |awk -F: '{print $2}' |awk '{print $1}')" == "active" ]; then
 	echo "service $type is up and running"
@@ -73,6 +91,22 @@ else
 	echo "$type is configured but doesn't start. please check" >> LOGFILE
 fi
 
+}
+
+function check_status () {
+service1=$1
+service_state="$(systemctl status $service1 |grep Active |awk '{print $2}')"
+if [ "$service_state" == "active" ]; then
+	echo """ ########################################
+$service1 service is running
+########################################
+"""
+else 
+	echo """ ########################################
+$service1 service is not running!!
+check manually after installation
+########################################
+"""
 }
 
 case $servertype in
@@ -135,7 +169,8 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 		
 	systemctl daemon-reload
 	systemctl enable prometheus
-	systemctl start prometheus
+	systemctl start prometheus; wait
+	check_status prometheus
 
 	
 	g_release="$(cat $initfile |grep grafana_release | awk -F= '{print $2}')"
@@ -158,7 +193,9 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 	apt install redis-server -y
 	sed -i 's/supervised no/supervised systemd/g' /etc/redis/redis.conf
 	sed -i 's/#   supervised systemd/#   supervised no/g' /etc/redis/redis.conf
-	systemctl restart redis
+	systemctl enable redis
+	systemctl restart redis; wait
+	check_status redis
 
     exporter_conf node_exporter
 	exporter_conf redis_exporter
@@ -173,7 +210,21 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
     ;;
 
   xmpp)
-	 ej_release="$(cat $initfile |grep ejabberd |awk -F= '{print $2}')"
+	 ejurl="$(cat /var/tmp/wbauto.ini |grep url | sed 's/ejabberd_download_url=//g')"
+	 echo "ejabberd installation file url: $ejurl"
+	 wget $ejurl ; wait
+	 mv *ejabberd*.deb ejabberd_pkg.deb
+	 dpkg -i ejabberd_pkg.deb ;  wait
+	 cp /opt/ejabberd-*/bin/ejabberd.service /etc/systemd/system/
+	 systemctl daemon-reload
+	 systemctl enable ejabberd
+	 systemctl start ejabberd; wait
+	 check_status ejabberd
+	 
+	 echo "alias ejabberdctl="/opt/ejabberd-*/bin/ejabberdctl"" >> ~/.profile
+	 source ~/.profile
+
+	 
      exporter_conf node_exporter
     ;;
 
@@ -190,5 +241,3 @@ esac
 echo "script ended. exiting."
 
 #eof
-
-
