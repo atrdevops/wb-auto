@@ -162,7 +162,7 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 	cp /var/tmp/prometheus.yml /etc/prometheus/
 	
 	for stype in admin auth wss monitoring mysql redis freeswitch kamailio xmpp; do 
-		s_ip="$(cat $initfile |grep $stype |grep ip |awk -F= '{print $2}')"
+		s_ip="$(cat $initfile |grep $stype |grep ip |grep -v data |awk -F= '{print $2}')"
 		sed -i "s/$stype:/$s_ip:/g" /etc/prometheus/prometheus.yml
 	done
 		
@@ -202,37 +202,88 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
     ;;
 
   freeswitch)
-     exporter_conf node_exporter
+	apt-get update && apt-get install -y gnupg2 wget ; wait
+	wget -O - https://files.freeswitch.org/repo/deb/freeswitch-1.8/fsstretch-archive-keyring.asc | apt-key add - ; wait
+	echo "deb http://files.freeswitch.org/repo/deb/freeswitch-1.8/ stretch main" > /etc/apt/sources.list.d/freeswitch.list
+	apt-get update && apt-get install -y freeswitch-meta-all ; wait
+	
+    exporter_conf node_exporter
     ;;
 
   kamailio)
     exporter_conf node_exporter
+	echo "installaing kamailio server"
+	echo "deb http://deb.kamailio.org/kamailio51 stretch main" > /etc/apt/sources.list.d/kamailio.list
+	wget -O- http://deb.kamailio.org/kamailiodebkey.gpg | apt-key add -
+	apt-get update
+	apt-get install -y net-tools procps kamailio kamailio-mysql-modules kamailio-tls-modules kamailio-xml-modules gnupg wget
+	
+	echo "installing rtpengine"
+	
+	apt-get install -y dpkg-dev
+	apt-get install -y git
+	git clone https://github.com/sipwise/rtpengine.git /root/rtpengine
+	
+	cd /root/rtpengine<<EOF
+	apt-get install debhelper default-libmysqlclient-dev gperf iptables-dev libavcodec-dev libavfilter-dev libavformat-dev\
+	libavutil-dev libbencode-perl libcrypt-openssl-rsa-perl libcrypt-rijndael-perl libhiredis-dev libio-multiplex-perl libio-socket-inet6-perl\
+	libjson-glib-dev libdigest-crc-perl libdigest-hmac-perl libnet-interface-perl libnet-interface-perl libssl-dev libsystemd-dev\
+	libxmlrpc-core-c3-dev libcurl4-openssl-dev libevent-dev libpcap0.8-dev markdown unzip nfs-common -y ; wait
+	
+	VER=1.0.4
+	curl https://codeload.github.com/BelledonneCommunications/bcg729/tar.gz/$VER >bcg729_$VER.orig.tar.gz
+	tar zxf bcg729_$VER.orig.tar.gz 
+	cd bcg729-1.0.4
+	git clone https://github.com/ossobv/bcg729-deb.git debian ; wait
+	dpkg-buildpackage -us -uc -sa
+	cd ../
+	dpkg -i libbcg729-*.deb
+	
+	cd /root/rtpengine
+	dpkg-buildpackage ; wait
+	cd ../
+	dpkg -i ngcp-rtpengine-daemon_*.deb ngcp-rtpengine-iptables_*.deb ; wait
+	apt-get install -y dkms
+	dpkg -i ngcp-rtpengine-kernel-dkms_*.deb ; wait
+
+	mv /etc/rtpengine/rtpengine.sample.conf /etc/rtpengine/rtpengine.conf
+	sed -i 's/# interface = internal/interface = internal/g' /etc/rtpengine/rtpengine.conf
+	mgmtip=cat $initfile |grep kamailio |grep ip |grep -v data |awk -F= '{print $2}'
+	dataip=cat $initfile |grep kamailio |grep ip |grep data |awk -F= '{print $2}'
+	sed -i 's/12.23.34.45/$dataip/g' /etc/rtpengine/rtpengine.conf
+	sed -i 's/23.34.45.54/$mgmtip/g' /etc/rtpengine/rtpengine.conf
+	systemctl start ngcp-rtpengine-daemon
+	dpkg -i ngcp-rtpengine-daemon-dbgsym_7.3.0.0+0~mr7.3.0.0_amd64.deb
+	dpkg -i ngcp-rtpengine-utils_7.3.0.0+0~mr7.3.0.0_all.deb
+	apt-get install module-assistant -y
+	dpkg -i ngcp-rtpengine-kernel-source_7.3.0.0+0~mr7.3.0.0_all.deb
+	sed -i 's/RUN_RTPENGINE=no/RUN_RTPENGINE=yes/g' /etc/default/ngcp-rtpengine-daemon	
+EOF
+	
+	systemctl restart ngcp-rtpengine-daemon
+	systemctl enable ngcp-rtpengine-daemon
+	check_status systemctl ngcp-rtpengine-daemon
+				
     ;;
 
   xmpp)
-	 ejurl="$(cat /var/tmp/wbauto.ini |grep url | sed 's/ejabberd_download_url=//g')"
-	 echo "ejabberd installation file url: $ejurl"
-	 wget $ejurl ; wait
-	 mv *ejabberd*.deb ejabberd_pkg.deb
-	 dpkg -i ejabberd_pkg.deb ;  wait
-	 cp /opt/ejabberd-*/bin/ejabberd.service /etc/systemd/system/
-	 systemctl daemon-reload
-	 systemctl enable ejabberd
-	 systemctl start ejabberd; wait
-	 check_status ejabberd
+	ejurl="$(cat /var/tmp/wbauto.ini |grep url | sed 's/ejabberd_download_url=//g')"
+	echo "ejabberd installation file url: $ejurl"
+	wget $ejurl ; wait
+	mv *ejabberd*.deb ejabberd_pkg.deb
+	dpkg -i ejabberd_pkg.deb ;  wait
+	cp /opt/ejabberd-*/bin/ejabberd.service /etc/systemd/system/
+	systemctl daemon-reload
+	systemctl enable ejabberd
+	systemctl start ejabberd; wait
+	check_status ejabberd
 	 
-	 echo "alias ejabberdctl="/opt/ejabberd-*/bin/ejabberdctl"" >> ~/.profile
-	 source ~/.profile
-
-	 
-     exporter_conf node_exporter
+	echo "alias ejabberdctl="/opt/ejabberd-*/bin/ejabberdctl"" >> ~/.profile
+	source ~/.profile
+ 
+    exporter_conf node_exporter
     ;;
-
-  pfsense)
-    echo -n "pfsense"
-    ;;
-          
-
+ 
   *)
     echo -n "unknown server type. nothing done" ; 
     ;;
@@ -241,3 +292,4 @@ esac
 echo "script ended. exiting."
 
 #eof
+
