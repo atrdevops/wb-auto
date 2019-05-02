@@ -42,6 +42,7 @@ $service1 service is not running!!
 check manually after installation
 ########################################
 """
+fi
 }
 
 function exporter_conf () {
@@ -93,21 +94,6 @@ fi
 
 }
 
-function check_status () {
-service1=$1
-service_state="$(systemctl status $service1 |grep Active |awk '{print $2}')"
-if [ "$service_state" == "active" ]; then
-	echo """ ########################################
-$service1 service is running
-########################################
-"""
-else 
-	echo """ ########################################
-$service1 service is not running!!
-check manually after installation
-########################################
-"""
-}
 
 case $servertype in
 
@@ -292,4 +278,5 @@ esac
 echo "script ended. exiting."
 
 #eof
+
 
