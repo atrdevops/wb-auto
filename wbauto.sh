@@ -248,13 +248,14 @@ if [ "$servertype" == "kamailio" ]; then
 	dpkg -i ngcp-rtpengine-daemon-dbgsym_7.3.0.0+0~mr7.3.0.0_amd64.deb
 	dpkg -i ngcp-rtpengine-utils_7.3.0.0+0~mr7.3.0.0_all.deb
 	apt-get install module-assistant -y
+	cd /root
 	dpkg -i ngcp-rtpengine-kernel-source_7.3.0.0+0~mr7.3.0.0_all.deb
 	sed -i 's/RUN_RTPENGINE=no/RUN_RTPENGINE=yes/g' /etc/default/ngcp-rtpengine-daemon	
 
 	
 	systemctl restart ngcp-rtpengine-daemon
 	systemctl enable ngcp-rtpengine-daemon
-	check_status ngcp-rtpengine-daemon
+	check_status systemctl ngcp-rtpengine-daemon
 				
 fi
 
