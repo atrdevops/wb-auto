@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 
 initfile=/var/tmp/wbauto.ini
 
@@ -12,7 +12,7 @@ touch $LOGFILE
 
 H_NAME="$(hostname | awk -F. '{print $1}')"
 
-servertype="$(cat wbauto.ini |grep $H_NAME |awk -F= '{print $1}' |awk -F_ '{print $1}')"
+servertype="$(cat $initfile |grep $H_NAME |awk -F= '{print $1}' |awk -F_ '{print $1}')"
 
 echo """
 server type is: $servertype
@@ -95,18 +95,16 @@ fi
 }
 
 
-case $servertype in
-
-  auth | wss)
+if [[ ( "$servertype" == "auth" ) || ( "$servertype" == "wss" ) ]] ; then
     exporter_conf node_exporter
-    ;;
+fi
 
-  admin)
+if [ "$servertype" == "admin" ]; then
 	apt-get install apache2 -y
     exporter_conf node_exporter
-    ;;
+fi
 
-  monitoring)
+if [ "$servertype" == "monitoring" ]; then
 	if [ ! -f /var/tmp/prometheus.yml ]; then
 		echo "prometheus.yml file is missing from: /var/tmp/. nothing done. exiting script"
 		exit 1
@@ -161,20 +159,21 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 	
 	g_release="$(cat $initfile |grep grafana_release | awk -F= '{print $2}')"
 	
-	wget https://dl.grafana.com/oss/release/grafana*$g_release*.deb ; wait
-	sudo dpkg -i grafana*$g_release*.deb 
+	wget https://dl.grafana.com/oss/release/grafana_"$g_release"_amd64.deb ; wait
+	sudo dpkg -i grafana_"$g_release"_amd64.deb 
+	check_status grafana-server
 	
 	
 	
     exporter_conf node_exporter
-    ;;
+fi
 
-  mysql)
+if [ "$servertype" == "mysql" ]; then
     exporter_conf node_exporter
 	exporter_conf mysqld_exporter
-    ;;
+fi
   
-  redis)
+if [ "$servertype" == "redis" ]; then
 	apt update
 	apt install redis-server -y
 	sed -i 's/supervised no/supervised systemd/g' /etc/redis/redis.conf
@@ -185,18 +184,18 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 
     exporter_conf node_exporter
 	exporter_conf redis_exporter
-    ;;
+fi
 
-  freeswitch)
+if [ "$servertype" == "freeswitch" ]; then
 	apt-get update && apt-get install -y gnupg2 wget ; wait
 	wget -O - https://files.freeswitch.org/repo/deb/freeswitch-1.8/fsstretch-archive-keyring.asc | apt-key add - ; wait
 	echo "deb http://files.freeswitch.org/repo/deb/freeswitch-1.8/ stretch main" > /etc/apt/sources.list.d/freeswitch.list
 	apt-get update && apt-get install -y freeswitch-meta-all ; wait
 	
     exporter_conf node_exporter
-    ;;
+fi
 
-  kamailio)
+if [ "$servertype" == "kamailio" ]; then
     exporter_conf node_exporter
 	echo "installaing kamailio server"
 	echo "deb http://deb.kamailio.org/kamailio51 stretch main" > /etc/apt/sources.list.d/kamailio.list
@@ -250,9 +249,9 @@ EOF
 	systemctl enable ngcp-rtpengine-daemon
 	check_status systemctl ngcp-rtpengine-daemon
 				
-    ;;
+fi
 
-  xmpp)
+if [ "$servertype" == "xmpp" ]; then
 	ejurl="$(cat /var/tmp/wbauto.ini |grep url | sed 's/ejabberd_download_url=//g')"
 	echo "ejabberd installation file url: $ejurl"
 	wget $ejurl ; wait
@@ -267,12 +266,8 @@ EOF
 	echo "alias ejabberdctl="/opt/ejabberd-*/bin/ejabberdctl"" >> ~/.profile
  
     exporter_conf node_exporter
-    ;;
- 
-  *)
-    echo -n "unknown server type. nothing done" ; 
-    ;;
-esac
+fi
+
 
 echo "script ended. exiting."
 
