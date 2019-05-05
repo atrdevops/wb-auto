@@ -1,4 +1,4 @@
-#! /bin/bash -x
+#! /bin/bash
 
 initfile=/var/tmp/wbauto.ini
 
@@ -16,9 +16,7 @@ servertype="$(cat $initfile |grep $H_NAME |awk -F= '{print $1}' |awk -F_ '{print
 
 echo """
 server type is: $servertype
-
 about to start installation. 
-
 installation log file: $LOGFILE
 """
 
@@ -56,9 +54,16 @@ type_release="$(cat $initfile |grep $type |awk -F= '{print $2}')"
 echo "about to configure $type"
 
 cd /root
-curl -LO https://github.com/prometheus/$type/releases/download/v$type_release/$type-$type_release.linux-amd64.tar.gz ; wait
-tar xvf $type-$type_release.linux-amd64.tar.gz ; wait
-cp /root/$type-$type_release.linux-amd64/$type /usr/local/bin
+
+if [ "$type" == "redis_exporter" ]; then
+	curl -LO https://github.com/oliver006/redis_exporter/releases/download/v$type_release/redis_exporter-v$type_release.linux-amd64.tar.gz ; wait
+	tar redis_exporter-v$type_release.linux-amd64.tar.gz ; wait
+		cp /root/redis_exporter /usr/local/bin
+else
+		curl -LO https://github.com/prometheus/$type/releases/download/v$type_release/$type-$type_release.linux-amd64.tar.gz ; wait
+		tar xvf $type-$type_release.linux-amd64.tar.gz ; wait
+		cp /root/$type-$type_release.linux-amd64/$type /usr/local/bin
+fi
 chown $type:$type /usr/local/bin/$type
 rm -rf $type
 
@@ -66,13 +71,11 @@ echo """[Unit]
 Description=$type Exporter
 Wants=network-online.target
 After=network-online.target
-
 [Service]
 User=$type
 Group=$type
 Type=simple
 ExecStart=/usr/local/bin/$type
-
 [Install]
 WantedBy=multi-user.target
 """ > /etc/systemd/system/$type.service
@@ -129,7 +132,6 @@ if [ "$servertype" == "monitoring" ]; then
 Description=Prometheus
 Wants=network-online.target
 After=network-online.target
-
 [Service]
 User=prometheus
 Group=prometheus
@@ -139,7 +141,6 @@ ExecStart=/usr/local/bin/prometheus \
     --storage.tsdb.path /var/lib/prometheus/ \
     --web.console.templates=/etc/prometheus/consoles \
     --web.console.libraries=/etc/prometheus/console_libraries
-
 [Install]
 WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 
@@ -231,7 +232,6 @@ if [ "$servertype" == "kamailio" ]; then
 	dpkg -i ngcp-rtpengine-daemon_*.deb ngcp-rtpengine-iptables_*.deb ; wait
 	apt-get install -y dkms
 	dpkg -i ngcp-rtpengine-kernel-dkms_*.deb ; wait
-
 	mv /etc/rtpengine/rtpengine.sample.conf /etc/rtpengine/rtpengine.conf
 	sed -i 's/# interface = internal/interface = internal/g' /etc/rtpengine/rtpengine.conf
 	mgmtip="$(cat $initfile |grep kamailio |grep ip |grep -v data |awk -F= '{print $2}')"
@@ -273,5 +273,4 @@ fi
 echo "script ended. exiting."
 
 #eof
-
 
