@@ -194,6 +194,7 @@ if [ "$servertype" == "freeswitch" ]; then
 	echo "deb http://files.freeswitch.org/repo/deb/freeswitch-1.8/ stretch main" > /etc/apt/sources.list.d/freeswitch.list
 	apt-get update && apt-get install -y freeswitch-meta-all ; wait
 	
+	check_status freeswitch
     exporter_conf node_exporter
 fi
 
