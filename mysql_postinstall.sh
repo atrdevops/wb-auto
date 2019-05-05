@@ -18,7 +18,7 @@ servertype="$(cat wbauto.ini |grep $H_NAME |awk -F= '{print $1}' |awk -F_ '{prin
 
 if [ "$(cat wbauto.ini |grep $H_NAME |awk -F= '{print $1}' |awk -F_ '{print $1}')" == "mysql" ]; then
 	
-	/usr/local/bin/expect <<EOF
+	/usr/bin/expect <<EOF
         spawn mysql -u root -p
         expect "Enter password:" { send "$mysqlpass\r" }
 		expect "mysql>" { send "CREATE USER 'mysqld_exporter'@'localhost' IDENTIFIED BY 'password' WITH MAX_USER_CONNECTIONS 3;\r" }
@@ -26,6 +26,7 @@ if [ "$(cat wbauto.ini |grep $H_NAME |awk -F= '{print $1}' |awk -F_ '{print $1}'
 		expect "mysql>" { send "exit\r" } 
 EOF
 
+fi
 
 echo "mysql post installation finished. exiting.."
 

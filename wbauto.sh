@@ -24,6 +24,7 @@ installation log file: $LOGFILE
 
 apt-get install curl -y 
 apt-get install -y software-properties-common # solve add-apt-repository command not found problem
+apt-get install -y expect
 
 useradd --no-create-home --shell /bin/false node_exporter
 
