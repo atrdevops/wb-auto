@@ -235,9 +235,10 @@ if [ "$servertype" == "kamailio" ]; then
 	cd /root/rtpengine
 	dpkg-buildpackage ; wait
 	cd /root/
-	dpkg -i ngcp-rtpengine-daemon_*.deb ngcp-rtpengine-iptables_*.deb ; wait
+	
+	dpkg -i /root/ngcp-rtpengine-daemon_*.deb ngcp-rtpengine-iptables_*.deb ; wait
 	apt-get install -y dkms
-	dpkg -i ngcp-rtpengine-kernel-dkms_*.deb ; wait
+	dpkg -i /root/ngcp-rtpengine-kernel-dkms_*.deb ; wait
 	mv /etc/rtpengine/rtpengine.sample.conf /etc/rtpengine/rtpengine.conf
 	sed -i 's/# interface = internal/interface = internal/g' /etc/rtpengine/rtpengine.conf
 	mgmtip="$(cat $initfile |grep kamailio |grep ip |grep -v data |awk -F= '{print $2}')"
@@ -246,11 +247,11 @@ if [ "$servertype" == "kamailio" ]; then
 	sed -i 's/23.34.45.54/$mgmtip/g' /etc/rtpengine/rtpengine.conf
 	systemctl start ngcp-rtpengine-daemon
 	cd /root
-	dpkg -i ngcp-rtpengine-daemon-dbgsym_7.3.0.0+0~mr7.3.0.0_amd64.deb
-	dpkg -i ngcp-rtpengine-utils_7.3.0.0+0~mr7.3.0.0_all.deb
+	dpkg -i /root/ngcp-rtpengine-daemon-dbgsym_7.3.0.0+0~mr7.3.0.0_amd64.deb
+	dpkg -i /root/ngcp-rtpengine-utils_7.3.0.0+0~mr7.3.0.0_all.deb
 	apt-get install module-assistant -y
 	cd /root
-	dpkg -i ngcp-rtpengine-kernel-source_7.3.0.0+0~mr7.3.0.0_all.deb
+	dpkg -i /root/ngcp-rtpengine-kernel-source_7.3.0.0+0~mr7.3.0.0_all.deb
 	sed -i 's/RUN_RTPENGINE=no/RUN_RTPENGINE=yes/g' /etc/default/ngcp-rtpengine-daemon	
 
 	
@@ -281,4 +282,5 @@ fi
 echo "script ended. exiting."
 
 #eof
+
 
