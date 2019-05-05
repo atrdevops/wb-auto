@@ -161,8 +161,8 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 	
 	g_release="$(cat $initfile |grep grafana_release | awk -F= '{print $2}')"
 	
-	wget https://dl.grafana.com/oss/release/grafana_$g_release_amd64.deb ; wait
-	sudo dpkg -i grafana_$g_release_amd64.deb 
+	wget https://dl.grafana.com/oss/release/grafana*$g_release*.deb ; wait
+	sudo dpkg -i grafana*$g_release*.deb 
 	
 	
 	
@@ -234,8 +234,8 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 
 	mv /etc/rtpengine/rtpengine.sample.conf /etc/rtpengine/rtpengine.conf
 	sed -i 's/# interface = internal/interface = internal/g' /etc/rtpengine/rtpengine.conf
-	mgmtip=cat $initfile |grep kamailio |grep ip |grep -v data |awk -F= '{print $2}'
-	dataip=cat $initfile |grep kamailio |grep ip |grep data |awk -F= '{print $2}'
+	mgmtip="$(cat $initfile |grep kamailio |grep ip |grep -v data |awk -F= '{print $2}')"
+	dataip="$(cat $initfile |grep kamailio |grep ip |grep data |awk -F= '{print $2}')"
 	sed -i 's/12.23.34.45/$dataip/g' /etc/rtpengine/rtpengine.conf
 	sed -i 's/23.34.45.54/$mgmtip/g' /etc/rtpengine/rtpengine.conf
 	systemctl start ngcp-rtpengine-daemon
@@ -265,7 +265,6 @@ EOF
 	check_status ejabberd
 	 
 	echo "alias ejabberdctl="/opt/ejabberd-*/bin/ejabberdctl"" >> ~/.profile
-	source ~/.profile
  
     exporter_conf node_exporter
     ;;
