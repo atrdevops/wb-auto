@@ -212,7 +212,7 @@ if [ "$servertype" == "kamailio" ]; then
 	apt-get install -y git
 	git clone https://github.com/sipwise/rtpengine.git /root/rtpengine
 	
-	cd /root/rtpengine<<EOF
+	cd /root/rtpengine
 	apt-get install debhelper default-libmysqlclient-dev gperf iptables-dev libavcodec-dev libavfilter-dev libavformat-dev\
 	libavutil-dev libbencode-perl libcrypt-openssl-rsa-perl libcrypt-rijndael-perl libhiredis-dev libio-multiplex-perl libio-socket-inet6-perl\
 	libjson-glib-dev libdigest-crc-perl libdigest-hmac-perl libnet-interface-perl libnet-interface-perl libssl-dev libsystemd-dev\
@@ -245,7 +245,7 @@ if [ "$servertype" == "kamailio" ]; then
 	apt-get install module-assistant -y
 	dpkg -i ngcp-rtpengine-kernel-source_7.3.0.0+0~mr7.3.0.0_all.deb
 	sed -i 's/RUN_RTPENGINE=no/RUN_RTPENGINE=yes/g' /etc/default/ngcp-rtpengine-daemon	
-EOF
+
 	
 	systemctl restart ngcp-rtpengine-daemon
 	systemctl enable ngcp-rtpengine-daemon
