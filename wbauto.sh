@@ -245,6 +245,7 @@ if [ "$servertype" == "kamailio" ]; then
 	sed -i 's/12.23.34.45/$dataip/g' /etc/rtpengine/rtpengine.conf
 	sed -i 's/23.34.45.54/$mgmtip/g' /etc/rtpengine/rtpengine.conf
 	systemctl start ngcp-rtpengine-daemon
+	cd /root
 	dpkg -i ngcp-rtpengine-daemon-dbgsym_7.3.0.0+0~mr7.3.0.0_amd64.deb
 	dpkg -i ngcp-rtpengine-utils_7.3.0.0+0~mr7.3.0.0_all.deb
 	apt-get install module-assistant -y
@@ -255,7 +256,7 @@ if [ "$servertype" == "kamailio" ]; then
 	
 	systemctl restart ngcp-rtpengine-daemon
 	systemctl enable ngcp-rtpengine-daemon
-	check_status systemctl ngcp-rtpengine-daemon
+	check_status ngcp-rtpengine-daemon
 				
 fi
 
