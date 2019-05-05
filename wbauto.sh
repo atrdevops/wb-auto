@@ -243,8 +243,8 @@ if [ "$servertype" == "kamailio" ]; then
 	sed -i 's/# interface = internal/interface = internal/g' /etc/rtpengine/rtpengine.conf
 	mgmtip="$(cat $initfile |grep kamailio |grep ip |grep -v data |awk -F= '{print $2}')"
 	dataip="$(cat $initfile |grep kamailio |grep ip |grep data |awk -F= '{print $2}')"
-	sed -i 's/12.23.34.45/$dataip/g' /etc/rtpengine/rtpengine.conf
-	sed -i 's/23.34.45.54/$mgmtip/g' /etc/rtpengine/rtpengine.conf
+	sed -i "s/12.23.34.45/$dataip/g" /etc/rtpengine/rtpengine.conf
+	sed -i "s/23.34.45.54/$mgmtip/g" /etc/rtpengine/rtpengine.conf
 	systemctl start ngcp-rtpengine-daemon
 	cd /root
 	dpkg -i /root/ngcp-rtpengine-daemon-dbgsym_*+*_amd64.deb
