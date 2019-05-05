@@ -254,7 +254,7 @@ if [ "$servertype" == "kamailio" ]; then
 	
 	systemctl restart ngcp-rtpengine-daemon
 	systemctl enable ngcp-rtpengine-daemon
-	check_status systemctl ngcp-rtpengine-daemon
+	check_status ngcp-rtpengine-daemon
 				
 fi
 
