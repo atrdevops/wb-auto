@@ -10,11 +10,10 @@ if [ ! -f $initfile ]; then
 fi
 
 
-touch $LOGFILE
 
 H_NAME="$(hostname | awk -F. '{print $1}')"
 
-servertype="$(cat wbauto.ini |grep $H_NAME |awk -F= '{print $1}' |awk -F_ '{print $1}')"
+servertype="$(cat $initfile |grep $H_NAME |awk -F= '{print $1}' |grep -v password |grep -v release |awk -F_ '{print $1})"
 
 if [ "$(cat wbauto.ini |grep $H_NAME |awk -F= '{print $1}' |awk -F_ '{print $1}')" == "mysql" ]; then
 	
