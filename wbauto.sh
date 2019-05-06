@@ -162,6 +162,10 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 	
 	wget https://dl.grafana.com/oss/release/grafana_"$g_release"_amd64.deb ; wait
 	sudo dpkg -i grafana_"$g_release"_amd64.deb 
+	
+	systemctl daemon-reload
+	systemctl enable grafana-server
+	systemctl start grafana-server
 	check_status grafana-server
 	
     exporter_conf node_exporter
