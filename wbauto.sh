@@ -9,7 +9,7 @@ fi
 
 H_NAME="$(hostname | awk -F. '{print $1}')"
 
-servertype="$(cat $initfile |grep $H_NAME |awk -F= '{print $1}' |grep -v ip |grep -v release |grep -v url |awk -F_ '{print $1}')"
+servertype="$(cat $initfile |grep $H_NAME |awk -F= '{print $1}' |grep -v ip |grep -v release |grep -v url |grep -v password |awk -F_ '{print $1}')"
 
 echo """
 server type is: $servertype
@@ -164,12 +164,32 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 	sudo dpkg -i grafana_"$g_release"_amd64.deb 
 	check_status grafana-server
 	
-	
-	
     exporter_conf node_exporter
 fi
 
 if [ "$servertype" == "mysql" ]; then
+
+	if [ "$(which mysql |wc -l)" == "0" ]; then
+		echo """####################################################################  
+			mysql manual installation wasn't performed and mysql doesn't exist.
+			please run manual section and then run this script again.
+			########################################################################"""
+		exit 1
+	fi
+	
+	apt-get update
+	apt-get install -y expect ; wait
+	
+	/usr/bin/expect <<EOF
+        spawn mysql -u root -p
+        expect "Enter password:" { send "$mysqlpass\r" }
+                expect "mysql>" { send "CREATE USER 'mysqld_exporter'@'localhost' IDENTIFIED BY 'password' WITH MAX_USER_CONNECTIONS 3;\r" }
+                expect "mysql>" { send "GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'mysqld_exporter'@'localhost';\r" }
+                expect "mysql>" { send "exit\r" }
+EOF
+
+	echo "mysql post installation finished."
+	
     exporter_conf node_exporter
 	exporter_conf mysqld_exporter
 fi
