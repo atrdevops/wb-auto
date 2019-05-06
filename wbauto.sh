@@ -7,9 +7,6 @@ if [ ! -f $initfile ]; then
 	exit 1
 fi
 
-
-touch $LOGFILE
-
 H_NAME="$(hostname | awk -F. '{print $1}')"
 
 servertype="$(cat $initfile |grep $H_NAME |awk -F= '{print $1}' |awk -F_ '{print $1}')"
