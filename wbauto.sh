@@ -218,6 +218,7 @@ if [ "$servertype" == "kamailio" ]; then
 	libavutil-dev libbencode-perl libcrypt-openssl-rsa-perl libcrypt-rijndael-perl libhiredis-dev libio-multiplex-perl libio-socket-inet6-perl\
 	libjson-glib-dev libdigest-crc-perl libdigest-hmac-perl libnet-interface-perl libnet-interface-perl libssl-dev libsystemd-dev\
 	libxmlrpc-core-c3-dev libcurl4-openssl-dev libevent-dev libpcap0.8-dev markdown unzip nfs-common -y ; wait
+	sleep 30
 	
 	echo "#############  installing bcd729 lib  ###################"
 	
@@ -229,13 +230,14 @@ if [ "$servertype" == "kamailio" ]; then
 	dpkg-buildpackage -us -uc -sa
 	cd /root/rtpengine/
 
-	dpkg -i libbcg729-*.deb
+	dpkg -i libbcg729-*.deb ; wait
 	
 	cd /root/rtpengine
 	dpkg-buildpackage ; wait
 	cd /root/
 	
 	dpkg -i /root/ngcp-rtpengine-daemon_*.deb ngcp-rtpengine-iptables_*.deb ; wait
+	sleep 20
 	apt-get install -y dkms
 	dpkg -i /root/ngcp-rtpengine-kernel-dkms_*.deb ; wait
 	mv /etc/rtpengine/rtpengine.sample.conf /etc/rtpengine/rtpengine.conf
@@ -246,11 +248,11 @@ if [ "$servertype" == "kamailio" ]; then
 	sed -i "s/23.34.45.54/$mgmtip/g" /etc/rtpengine/rtpengine.conf
 	systemctl start ngcp-rtpengine-daemon
 	cd /root
-	dpkg -i /root/ngcp-rtpengine-daemon-dbgsym_*+*_amd64.deb
-	dpkg -i /root/ngcp-rtpengine-utils_*+*_all.deb
+	dpkg -i /root/ngcp-rtpengine-daemon-dbgsym_*+*_amd64.deb ; wait
+	dpkg -i /root/ngcp-rtpengine-utils_*+*_all.deb ; wait
 	apt-get install module-assistant -y
 	cd /root
-	dpkg -i /root/ngcp-rtpengine-kernel-source_*+*_all.deb
+	dpkg -i /root/ngcp-rtpengine-kernel-source_*+*_all.deb ; wait
 	sed -i 's/RUN_RTPENGINE=no/RUN_RTPENGINE=yes/g' /etc/default/ngcp-rtpengine-daemon	
 
 	
