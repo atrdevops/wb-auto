@@ -183,8 +183,10 @@ if [ "$servertype" == "mysql" ]; then
 	
 	apt-get update
 	apt-get install -y expect ; wait
-	
+
 	/usr/bin/expect <<EOF
+	initfile="/var/tmp/wbauto.ini
+	mysqlpass="$(cat $initfile |grep mysql_password |awk -F= '{print $2}')"
         spawn mysql -u root -p
         expect "Enter password:" { send "$mysqlpass\r" }
                 expect "mysql>" { send "CREATE USER 'mysqld_exporter'@'localhost' IDENTIFIED BY 'password' WITH MAX_USER_CONNECTIONS 3;\r" }
