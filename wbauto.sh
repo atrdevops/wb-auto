@@ -186,7 +186,6 @@ if [ "$servertype" == "mysql" ]; then
 	mysqlpass="$(cat $initfile |grep mysql_password |awk -F= '{print $2}')"
 
 	/usr/bin/expect <<EOF
-	initfile="/var/tmp/wbauto.ini
         spawn mysql -u root -p
         expect "Enter password:" { send "$mysqlpass\r" }
                 expect "mysql>" { send "CREATE USER 'mysqld_exporter'@'localhost' IDENTIFIED BY 'password' WITH MAX_USER_CONNECTIONS 3;\r" }
