@@ -9,7 +9,7 @@ fi
 
 H_NAME="$(hostname | awk -F. '{print $1}')"
 
-servertype="$(cat $initfile |grep $H_NAME |awk -F= '{print $1}' |grep -v ip |awk -F_ '{print $1}')"
+servertype="$(cat $initfile |grep $H_NAME |awk -F= '{print $1}' |grep -v ip |grep -v release |grep -v url |awk -F_ '{print $1}')"
 
 echo """
 server type is: $servertype
