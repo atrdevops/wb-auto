@@ -54,12 +54,12 @@ cd /root
 
 if [ "$type" == "redis_exporter" ]; then
 	curl -LO https://github.com/oliver006/redis_exporter/releases/download/v$type_release/redis_exporter-v$type_release.linux-amd64.tar.gz ; wait
-	tar redis_exporter-v$type_release.linux-amd64.tar.gz ; wait
-		cp /root/redis_exporter /usr/local/bin
+	tar xvf redis_exporter-v$type_release.linux-amd64.tar.gz ; wait
+	cp /root/redis_exporter /usr/local/bin
 else
-		curl -LO https://github.com/prometheus/$type/releases/download/v$type_release/$type-$type_release.linux-amd64.tar.gz ; wait
-		tar xvf $type-$type_release.linux-amd64.tar.gz ; wait
-		cp /root/$type-$type_release.linux-amd64/$type /usr/local/bin
+	curl -LO https://github.com/prometheus/$type/releases/download/v$type_release/$type-$type_release.linux-amd64.tar.gz ; wait
+	tar xvf $type-$type_release.linux-amd64.tar.gz ; wait
+	cp /root/$type-$type_release.linux-amd64/$type /usr/local/bin
 fi
 chown $type:$type /usr/local/bin/$type
 rm -rf $type
