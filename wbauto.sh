@@ -97,6 +97,8 @@ fi
 
 
 if [[ ( "$servertype" == "auth" ) || ( "$servertype" == "wss" ) ]] ; then
+    apt install default-jre -y
+    apt install default-jdk -y
     exporter_conf node_exporter
 fi
 
