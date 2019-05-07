@@ -186,6 +186,10 @@ if [ "$servertype" == "mysql" ]; then
 	
 	apt-get update
 	apt-get install -y expect ; wait
+
+	exporter_conf node_exporter
+        exporter_conf mysqld_exporter
+
 	mysqlpass="$(cat $initfile |grep mysql_password |awk -F= '{print $2}')"
 
 	/usr/bin/expect <<EOF
@@ -198,8 +202,6 @@ EOF
 
 	echo "mysql post installation finished."
 	
-    exporter_conf node_exporter
-	exporter_conf mysqld_exporter
 fi
   
 if [ "$servertype" == "redis" ]; then
