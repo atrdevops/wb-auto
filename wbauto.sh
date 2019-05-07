@@ -103,7 +103,10 @@ if [[ ( "$servertype" == "auth" ) || ( "$servertype" == "wss" ) ]] ; then
 fi
 
 if [ "$servertype" == "admin" ]; then
-	apt-get install apache2 -y
+    apt-get install apache2 -y ; wait
+    systemctl enable apache2
+    systemctl start apache2
+    check_status apache2
     exporter_conf node_exporter
 fi
 
