@@ -64,7 +64,28 @@ fi
 chown $type:$type /usr/local/bin/$type
 rm -rf $type
 
-echo """[Unit]
+if [ "$type" == "mysqld_exporter" ]; then
+	echo """[Unit]
+Description=MySQL Exporter Service
+Wants=network.target
+After=network.target
+
+[Service]
+User=mysqld_exporter
+Group=mysqld_exporter
+Environment=quoteDATA_SOURCE_NAME=mysqld_exporter:password@unix(/var/run/mysqd/mysqld.sock)quote
+Type=simple
+ExecStart=/usr/local/bin/mysqld_exporter
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+""" > /etc/systemd/system/mysqld_exporter.service
+
+	sed -i 's/quote/"/g' /etc/systemd/system/mysqld_exporter.service
+
+else
+	echo """[Unit]
 Description=$type Exporter
 Wants=network-online.target
 After=network-online.target
@@ -77,7 +98,9 @@ ExecStart=/usr/local/bin/$type
 WantedBy=multi-user.target
 """ > /etc/systemd/system/$type.service
 
-sed -i 's/scription=mysqld_exporter/scription=Mysqld/g' /etc/systemd/system/$type.service
+fi
+
+
 sed -i 's/scription=node_exporter/scription=Node/g' /etc/systemd/system/$type.service
 sed -i 's/scription=redis_exporter/scription=Redis/g' /etc/systemd/system/$type.service
 
@@ -222,6 +245,10 @@ if [ "$servertype" == "freeswitch" ]; then
 	wget -O - https://files.freeswitch.org/repo/deb/freeswitch-1.8/fsstretch-archive-keyring.asc | apt-key add - ; wait
 	echo "deb http://files.freeswitch.org/repo/deb/freeswitch-1.8/ stretch main" > /etc/apt/sources.list.d/freeswitch.list
 	apt-get update && apt-get install -y freeswitch-meta-all ; wait
+	
+	systemctl daemon-reload
+	systemctl enable freeswitch
+	systemctl start freeswitch
 	
 	check_status freeswitch
     exporter_conf node_exporter
