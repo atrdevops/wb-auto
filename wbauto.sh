@@ -189,6 +189,8 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 	wget https://dl.grafana.com/oss/release/grafana_"$g_release"_amd64.deb ; wait
 	sudo dpkg -i grafana_"$g_release"_amd64.deb 
 	
+	echo "######## installed grafana-server ##########"
+	
 	systemctl daemon-reload
 	systemctl enable grafana-server
 	systemctl start grafana-server
@@ -211,7 +213,7 @@ if [ "$servertype" == "mysql" ]; then
 	apt-get install -y expect ; wait
 
 	exporter_conf node_exporter
-        exporter_conf mysqld_exporter
+    exporter_conf mysqld_exporter
 
 	mysqlpass="$(cat $initfile |grep mysql_password |awk -F= '{print $2}')"
 
@@ -230,6 +232,9 @@ fi
 if [ "$servertype" == "redis" ]; then
 	apt update
 	apt install redis-server -y
+	
+	echo "######## installed redis server ##########"
+	
 	sed -i 's/supervised no/supervised systemd/g' /etc/redis/redis.conf
 	sed -i 's/#   supervised systemd/#   supervised no/g' /etc/redis/redis.conf
 	systemctl enable redis
@@ -245,6 +250,8 @@ if [ "$servertype" == "freeswitch" ]; then
 	wget -O - https://files.freeswitch.org/repo/deb/freeswitch-1.8/fsstretch-archive-keyring.asc | apt-key add - ; wait
 	echo "deb http://files.freeswitch.org/repo/deb/freeswitch-1.8/ stretch main" > /etc/apt/sources.list.d/freeswitch.list
 	apt-get update && apt-get install -y freeswitch-meta-all ; wait
+	
+	echo "######## installed freeswitch ##########"
 	
 	systemctl daemon-reload
 	systemctl enable freeswitch
@@ -262,8 +269,8 @@ if [ "$servertype" == "kamailio" ]; then
 	apt-get update
 	apt-get install -y net-tools procps kamailio kamailio-mysql-modules kamailio-tls-modules kamailio-xml-modules gnupg wget
 	
-	echo "installing rtpengine"
-	echo "#####################"
+	echo "######## installed kamailio. about to install rtpengine.  ##########"
+	
 	
 	apt-get install -y dpkg-dev
 	apt-get install -y git
@@ -338,6 +345,9 @@ if [ "$servertype" == "xmpp" ]; then
 	wget $ejurl ; wait
 	mv *ejabberd*.deb ejabberd_pkg.deb
 	dpkg -i ejabberd_pkg.deb ;  wait
+	
+	echo "######## installed ejabberd ##########"
+	
 	cp /opt/ejabberd-*/bin/ejabberd.service /etc/systemd/system/
 	systemctl daemon-reload
 	systemctl enable ejabberd
@@ -353,4 +363,3 @@ fi
 echo "script ended. exiting."
 
 #eof
-
