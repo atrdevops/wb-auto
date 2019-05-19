@@ -363,7 +363,7 @@ if [ "$servertype" == "xmpp" ]; then
 fi
 
 
-echo "script ended. successfully."
+echo "script ended successfully."
 
 #eof
 
