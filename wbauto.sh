@@ -152,6 +152,7 @@ if [ "$servertype" == "monitoring" ]; then
 	cp -r prometheus-$p_release.linux-amd64/consoles /etc/prometheus
 	cp -r prometheus-$p_release.linux-amd64/console_libraries /etc/prometheus
 	chown -R prometheus:prometheus /etc/prometheus
+	chown -R prometheus:prometheus /var/lib/prometheus
 	rm -rf prometheus-$p_release.linux-amd64.tar.gz prometheus-$p_release.linux-amd64
 	echo """[Unit]
 Description=Prometheus
