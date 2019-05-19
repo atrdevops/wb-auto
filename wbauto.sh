@@ -26,6 +26,8 @@ useradd --no-create-home --shell /bin/false node_exporter
 
 function check_status () {
 service1=$1
+echo "waiting for $service1 service to start...."
+sleep 60
 service_state="$(systemctl status $service1 |grep Active |awk '{print $2}')"
 if [ "$service_state" == "active" ]; then
 	echo """ ########################################
@@ -264,7 +266,7 @@ fi
 
 if [ "$servertype" == "kamailio" ]; then
     exporter_conf node_exporter
-	echo "installaing kamailio server"
+	echo "##########   installaing kamailio server    #########"
 	echo "deb http://deb.kamailio.org/kamailio51 stretch main" > /etc/apt/sources.list.d/kamailio.list
 	wget -O- http://deb.kamailio.org/kamailiodebkey.gpg | apt-key add -
 	apt-get update
@@ -361,6 +363,7 @@ if [ "$servertype" == "xmpp" ]; then
 fi
 
 
-echo "script ended. exiting."
+echo "script ended. successfully."
 
 #eof
+
