@@ -190,7 +190,7 @@ WantedBy=multi-user.target""" > /etc/systemd/system/prometheus.service
 	g_release="$(cat $initfile |grep grafana_release | awk -F= '{print $2}')"
 	
 	wget https://dl.grafana.com/oss/release/grafana_"$g_release"_amd64.deb ; wait
-	sudo dpkg -i grafana_"$g_release"_amd64.deb 
+	dpkg -i grafana_"$g_release"_amd64.deb 
 	
 	echo "######## installed grafana-server ##########"
 	
