@@ -1,0 +1,4 @@
+bcg729_1.0.4-0osso2+d9_amd64.buildinfo libs optional
+libbcg729-0-dbg_1.0.4-0osso2+d9_amd64.deb debug extra
+libbcg729-0_1.0.4-0osso2+d9_amd64.deb libs optional
+libbcg729-dev_1.0.4-0osso2+d9_amd64.deb libdevel optional

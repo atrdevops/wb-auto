@@ -1,0 +1,17 @@
+Package: libbcg729-dev
+Source: bcg729
+Version: 1.0.4-0osso2+d9
+Architecture: amd64
+Maintainer: Debian VoIP Team <pkg-voip-maintainers@lists.alioth.debian.org>
+Installed-Size: 442
+Depends: libbcg729-0 (= 1.0.4-0osso2+d9)
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.linphone.org/technical-corner/bcg729/overview
+Description: Development files for the ITU G.729 compatible audio codec
+ Bcg729 is an open source implementation of the ITU G729 Annex A
+ speech codec. Written in C 99, the library is fully portable. It
+ runs on many platforms, including ARM and x86.
+ .
+ This package contains the development files.

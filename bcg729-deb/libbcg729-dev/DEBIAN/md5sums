@@ -1,0 +1,6 @@
+d6b3cc2d7d92a01160a0469c1e436731  usr/include/bcg729/decoder.h
+2c956e72e0dd56ff55eb49a3a80912ae  usr/include/bcg729/encoder.h
+df06523cbde78aff198e32a1affe516f  usr/lib/x86_64-linux-gnu/libbcg729.a
+f210fa61bd75f8ececff939b601ea5e8  usr/lib/x86_64-linux-gnu/pkgconfig/libbcg729.pc
+b077c4887eab4a87bc6295407f76e428  usr/share/doc/libbcg729-dev/changelog.Debian.gz
+7dfec4af0c18ad5608225262467415ef  usr/share/doc/libbcg729-dev/copyright
